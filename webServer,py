@@ -1,0 +1,47 @@
+# Libraries
+
+from flask import Flask, request, jsonify
+from FaceDetection import FaceDetector, StopDetect, getinfo
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.schedulers.background import BlockingScheduler
+
+
+##### Web Server
+
+p = 0 # Set cam index
+app = Flask(__name__, template_folder='.')
+REFRESH_INTERVAL = 0.2 # Detect faces every x seconds
+scheduler = BackgroundScheduler()
+scheduler.start()
+
+@app.route('/startDetector',  methods=['GET', 'POST'])
+def StartDetector(p=p):
+    if request.method == 'GET':
+        print("Start detector")
+        FaceDetector(scheduler,REFRESH_INTERVAL,p=p)
+    return jsonify({"rsp" : "ok"})
+
+@app.route('/stopDetector',  methods=['GET', 'POST'])
+def StopDetector():
+    if request.method == 'GET':
+        StopDetect(scheduler)
+    return jsonify({"rsp" : "ok"})
+
+@app.route('/getInfo',  methods=['GET', 'POST'])
+def GetInfo():
+    if request.method == 'GET':
+        d = getinfo()
+        return jsonify(**d)
+	
+if __name__ == '__main__':
+    print("---- USAGE ----")
+    print("START Detector: curl 127.0.0.1:5000/startDetector")
+    print("STOP Detector: curl 127.0.0.1:5000/stopDetector")
+    print("GET NUMBER OF FACES AND DIM: curl 127.0.0.1:5000/getInfo")
+    print("---------------")
+    app.run()
+
+
+
+
+
