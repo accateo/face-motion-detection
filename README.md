@@ -23,3 +23,23 @@ Tested with Python version 3.7.3. I also used pip to install modules.
 - Pandas installed
 
   *pip3 install pandas*
+
+
+## Content
+
+- webServer.py
+  
+  Main file. Manage the web server and contains the API to start and stop detection
+
+- detection.py
+  
+  File that contains all the code to face and motion detection
+  
+- haarcascade_frontalface_default.xml and haarcascade_profileface.xml
+
+  Two xml descriptive files which are used to detect front and side faces. 
+  
+  
+ ## How to run
+ 
+ *python3 webServer.py*
