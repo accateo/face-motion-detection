@@ -24,13 +24,10 @@ def DetectFace(faceCascade, faceProfileCascade, minW,minH):
     global positions
 
     ret, img = cam.read()
-    #posizioni facce nello spazio
+    #faces positions in the space
     positions = []
     face_found = False
-    #cam.set(3, 1280)
-    #cam.set(4, 960)
-    #cv2.imwrite('./face_full.jpg',img)
-    #parte face detection
+    #face detection
     faces = faceCascade.detectMultiScale(
         img,
         scaleFactor = 1.2,
@@ -44,12 +41,13 @@ def DetectFace(faceCascade, faceProfileCascade, minW,minH):
     array_coordinates_faces = []
     for(x,y,w,h) in faces:
         pair_data = []
+	#draw rectangle around the faces
         cv2.rectangle(img, (x,y), (x+w,y+h), (0,255,0), 2)
         pair_data = (((x+x+w)/2),((y+y+w)/2))
         pair_coordinates = (x,y)
         array_coordinates_faces.append(pair_coordinates)
         array_center_faces.append(pair_data)
-        #calcolo posizione faccia nello spazio e aggiungo ad array
+        #position of the faces in the space
         positions.append(positionFromCoordinates(pair_data))
         detect_face = img[int(y):int(y+h), int(x):int(x+w)]
         detect_face =cv2.cvtColor(detect_face, cv2.COLOR_RGB2BGR)
@@ -57,7 +55,7 @@ def DetectFace(faceCascade, faceProfileCascade, minW,minH):
         w_.append(int(w))
         face_found = True
     print(data)
-    #facce di profilo
+    #profile faces
     if face_found == False:
         faces = faceProfileCascade.detectMultiScale(
             img,
@@ -67,14 +65,12 @@ def DetectFace(faceCascade, faceProfileCascade, minW,minH):
             minSize = (int(minW), int(minH)),
            )
         for(x,y,w,h) in faces:
-            print("PROFILO")
             pair_data = []
             cv2.rectangle(img, (x,y), (x+w,y+h), (0,255,0), 2)
             pair_data = (((x+x+w)/2),((y+y+w)/2))
             pair_coordinates = (x,y)
             array_coordinates_faces.append(pair_coordinates)
             array_center_faces.append(pair_data)
-            #calcolo posizione faccia nello spazio e aggiungo ad array
             positions.append(positionFromCoordinates(pair_data))
             detect_face = img[int(y):int(y+h), int(x):int(x+w)]
             detect_face =cv2.cvtColor(detect_face, cv2.COLOR_RGB2BGR)
@@ -87,18 +83,15 @@ def DetectFace(faceCascade, faceProfileCascade, minW,minH):
              img,
              scaleFactor = 1.3,
              minNeighbors = 4,
-             #flags = (cv2.DO_CANNY_PRUNING + cv2.FIND_BIGGEST_OBJECT + cv2.DO_ROUGH_SEARCH),
              minSize = (int(minW), int(minH)),
             )
         for(x,y,w,h) in faces:
-            print("PROFILO")
             pair_data = []
             cv2.rectangle(img, (x,y), (x+w,y+h), (0,255,0), 2)
             pair_data = (((x+x+w)/2),((y+y+w)/2))
             pair_coordinates = (x,y)
             array_coordinates_faces.append(pair_coordinates)
             array_center_faces.append(pair_data)
-            #calcolo posizione faccia nello spazio e aggiungo ad array
             positions.append(positionFromCoordinates(pair_data))
             detect_face = img[int(y):int(y+h), int(x):int(x+w)]
             detect_face =cv2.cvtColor(detect_face, cv2.COLOR_RGB2BGR)
@@ -106,8 +99,8 @@ def DetectFace(faceCascade, faceProfileCascade, minW,minH):
             w_.append(int(w))
             face_found=True
 
-    #parte motion detection
-    # Initializing motion = 0(no motion) 
+    #motion detection
+    #Initializing motion = 0(no motion) 
     motion = 0
     data["motion"] = 0
     direction = ""
@@ -125,13 +118,14 @@ def DetectFace(faceCascade, faceProfileCascade, minW,minH):
 	##Find max element and index
     if len(w_):
         print("Max:{}".format(w_.index(max(w_))))
-    #global static_back
+    #sometimes I update the original frame that I use to detect motion (thresholdFrameBackground)
     if static_back is None or counterFrame > thresholdFrameBackground: 
         static_back = gray	
         motion = 0
         counterFrame = 0
         data["motion"] = 0;
-        data = {"N_volti":len(faces),"dim":w_, "motion": motion, "array_center": array_center_faces, "array_coordinates": array_coordinates_faces, "positions_faces": positions ,"array_center_motion": array_center_motion, "direction" : ""}
+	#json data returned
+        data = {"N_faces":len(faces),"dim":w_, "motion": motion, "array_center": array_center_faces, "array_coordinates": array_coordinates_faces, "positions_faces": positions ,"array_center_motion": array_center_motion, "direction" : ""}
         print("{} - {}".format(pd.datetime.now(), motion))
         return
     ###
@@ -150,15 +144,12 @@ def DetectFace(faceCascade, faceProfileCascade, minW,minH):
 					   cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE) 
     cnts = imutils.grab_contours(cnts)  
     for contour in cnts: 
+	#I'm not considering very little movement
         if cv2.contourArea(contour) < thresholdContourArea: 
             continue
 
         motion = 1
         pair_motion_center = []
-        # compute the bounding box for the contour, draw it on the frame,
-        # and update the text
-        #(x, y, w, h) = cv2.boundingRect(contour)
-        #cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
         data["motion"] = 1
         (xx, yy, ww, hh) = cv2.boundingRect(contour)
         pair_motion_center = (((xx+xx+ww)/2),((yy+yy+ww)/2))
@@ -167,6 +158,7 @@ def DetectFace(faceCascade, faceProfileCascade, minW,minH):
         cv2.imwrite("./motion.jpg",img)
         print("{} - {}".format(pd.datetime.now(), motion))
         break
+    #position of the motion
     if motion==1:
        if ((xx+xx+ww)/2)<200:
            direction = "left"
@@ -175,9 +167,8 @@ def DetectFace(faceCascade, faceProfileCascade, minW,minH):
                direction = "right"
            else:
                direction = "center"
-    data = {"N_volti":len(faces),"dim":w_, "motion": motion,"array_center": array_center_faces , "array_coordinates": array_coordinates_faces, "positions_faces": positions, "array_center_motion": array_center_motion, "direction" : direction}
+    data = {"N_faces":len(faces),"dim":w_, "motion": motion,"array_center": array_center_faces , "array_coordinates": array_coordinates_faces, "positions_faces": positions, "array_center_motion": array_center_motion, "direction" : direction}
     print("{} - {}".format(pd.datetime.now(), motion))
-    #cv2.imshow("Security Feed", img)
     # Increment the frame counter
     counterFrame += 1
     static_back = gray
@@ -190,6 +181,7 @@ def FaceDetector(scheduler, REFRESH_INTERVAL,p:int=0):
     global counterFrame
     # Assigning our static_back to None 
     static_back = None
+    #two profiles: side faces and frontal faces
     faceCascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
     faceProfileCascade = cv2.CascadeClassifier("haarcascade_profileface.xml")
     millisec = 10
