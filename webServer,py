@@ -1,7 +1,7 @@
 # Libraries
 
 from flask import Flask, request, jsonify
-from FaceDetection import FaceDetector, StopDetect, getinfo
+from detection import FaceDetector, StopDetect, getinfo
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.schedulers.background import BlockingScheduler
 
