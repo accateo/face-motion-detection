@@ -46,13 +46,17 @@ Tested with Python version 3.7.3. I also used pip to install modules.
  *python3 webServer.py*
  
  To start detection:
+ 
  http call like this
+ 
  http://127.0.0.1:5000/startDetector
  
  To stop detection:
+ 
  http://127.0.0.1:5000/stopDetector
  
  To get info about detection (number of faces, motion detected, distance...):
+ 
  http://127.0.0.1:5000/getInfo
  
  127.0.0.1 for local or the IP where the server runs...
