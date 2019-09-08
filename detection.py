@@ -12,7 +12,15 @@ counterFrame = 0
 thresholdFrameBackground = 300
 thresholdContourArea = 1500
 enable = 0
-
+# data returned
+# data = {"N_faces":0,"dim":[213], "motion": 1, "array_center": [0,0], "array_coordinates": [0,0], "positions_faces": ["top left"] ,"array_center_motion": [0], "direction" : "left"}
+# N_faces - number of faces
+# dim - dimensions of squares around the faces
+# motion - 0 not motion 1 motion
+# array_center - coordinates of the center of the square around the face detected
+# positions_faces - positions of the faces "top left", "top right"...
+# array_center_motion - coordinates of the center of the motion detected
+# direction - direction of motion detection "left", "right", "top", "bottom"
 def DetectFace(faceCascade, faceProfileCascade, minW,minH):
     global motion
     global data
@@ -57,6 +65,7 @@ def DetectFace(faceCascade, faceProfileCascade, minW,minH):
     print(data)
     #profile faces
     if face_found == False:
+	print("profile face detected")
         faces = faceProfileCascade.detectMultiScale(
             img,
             scaleFactor = 1.3,
@@ -79,7 +88,8 @@ def DetectFace(faceCascade, faceProfileCascade, minW,minH):
             face_found=True
     if face_found==False:
         cv2.flip(img,1,img)
-        faces = faceProfileCascade.detectMultiScale(
+	print("frontal face detected")
+        faces = faceCascade.detectMultiScale(
              img,
              scaleFactor = 1.3,
              minNeighbors = 4,
